@@ -118,6 +118,7 @@ const Closed = () => {
   const [sellDateFilter, setSellDateFilter] = useState("");
   const [accountFilter, setAccountFilter] = useState("");
   const [accountOptions, setAccountOptions] = useState([]);
+  const [accountTypeOptions, setAccountTypeOptions] = useState([]);
   const [accountTypeFilter, setAccountTypeFilter] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "stock_name", direction: "asc" });
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -207,17 +208,16 @@ const Closed = () => {
   useEffect(() => {
     if (!backendStocks || backendStocks.length === 0) {
       setFilteredStocks([]);
+      setAccountOptions([]);
+      setAccountTypeOptions([]);
       return;
     }
 
-    const uniqueAccounts = [
-      ...new Set(
-        backendStocks
-          .flatMap((stock) => (stock.transactions || []).map((t) => t.account_name))
-          .filter(Boolean)
-      ),
-    ];
+    const transactions = backendStocks.flatMap((stock) => stock.transactions || []);
+    const uniqueAccounts = [...new Set(transactions.map((t) => t.account_name).filter(Boolean))];
+    const uniqueAccountTypes = [...new Set(transactions.map((t) => t.account_type).filter(Boolean))];
     setAccountOptions(uniqueAccounts);
+    setAccountTypeOptions(uniqueAccountTypes);
 
     const filtered = backendStocks
       .filter((stock) => {
@@ -545,8 +545,11 @@ const Closed = () => {
             className="p-3 bg-gray-700/40 text-white border-none rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner"
           >
             <option value="">Account Type</option>
-            <option value="Free">Free</option>
-            <option value="Regular">Regular</option>
+            {accountTypeOptions.map((accountType) => (
+              <option key={accountType} value={accountType}>
+                {accountType}
+              </option>
+            ))}
           </select>
 
           <div className="flex items-center gap-1 bg-gray-700/40 px-3 py-1.5 rounded-xl border border-gray-600/30">
@@ -886,9 +889,11 @@ const Closed = () => {
                   className="w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none"
                 >
                   <option value="" className="bg-gray-900">Select Type</option>
-                  <option value="Free" className="bg-gray-900">Free</option>
-                  <option value="Regular" className="bg-gray-900">Regular</option>
-                  <option value="ETF" className="bg-gray-900">ETF</option>
+                  {accountTypeOptions.map((accountType) => (
+                    <option key={accountType} value={accountType} className="bg-gray-900">
+                      {accountType}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
