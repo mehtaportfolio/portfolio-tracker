@@ -1,0 +1,27 @@
+﻿At line:1 char:268
++ ... derType = \'LIMIT\', price) {\n    ensureSmartApi();\n    if (!sessio ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unexpected token 'LIMIT\', price) {\n    ensureSmartApi();\n    if 
+(!sessionData) {\n        const loginResult = await login();\n        if 
+(!loginResult.success) throw new Error( Angel One login failed);\n    }\n\n    
+try {\n        const payload = {\n            variety: NORMAL,\n            
+tradingsymbol: symbol,\n            symboltoken: token,\n            
+transactiontype: SELL,\n            exchange: NSE,\n            ordertype: 
+orderType,\n            producttype: DELIVERY,\n            duration: DAY,\n   
+         quantity: quantity\n        };\n\n        if ((orderType ; 
+'').toUpperCase() === 'LIMIT') {\n            payload.price = price;\n         
+   payload.pricetype = 'LMT';\n        } else {\n            payload.price = 
+0;\n            payload.pricetype = 'MKT';\n            
+payload.price_lower_range = -1;\n            payload.price_upper_range = -1;\n 
+       }\n\n        const response = await smartApi.placeOrder(payload);\n\n   
+     if (response.status ; response.data) {\n            return { success: 
+true, order_id: response.data.orderid };\n        } else {\n            throw 
+new Error(response.message ; Failed to place order in Angel One);\n        }\n 
+   } catch (error) {\n        log(Angel One placeOrder error: , 'ERROR');\n    
+    throw error;\n    }\n}\n\n/**\n * Get Order Status'' in expression or 
+statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordEx 
+   ception
+    + FullyQualifiedErrorId : UnexpectedToken
+ 
+

@@ -1,0 +1,83 @@
+{
+  "name": "portfolio-tracker",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.8",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.18.1",
+    "chart.js": "^4.5.1",
+    "chartjs-plugin-datalabels": "^2.2.0",
+    "dayjs": "^1.11.21",
+    "exceljs": "^4.4.0",
+    "hi-base32": "^0.5.1",
+    "html2pdf.js": "^0.14.0",
+    "jspdf": "^3.0.2",
+    "jspdf-autotable": "^5.0.2",
+    "jszip": "^3.10.1",
+    "kiteconnect": "^5.3.0",
+    "lightweight-charts": "^5.2.0",
+    "lucide-react": "^0.540.0",
+    "node-cron": "^4.6.0",
+    "otplib": "^13.4.0",
+    "prettier": "^3.8.3",
+    "puppeteer": "^25.0.2",
+    "react": "^19.2.8",
+    "react-chartjs-2": "^5.3.1",
+    "react-dom": "^19.2.8",
+    "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.7.0",
+    "react-router-dom": "^7.18.1",
+    "react-select": "^5.10.2",
+    "react-toastify": "^11.1.0",
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
+  },
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest",
+    "preview": "vite preview"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "postcss-flexbugs-fixes": "^5.0.2",
+    "postcss-preset-env": "^10.2.4",
+    "supabase": "^2.39.2",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "fix-imports.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://pankajmehta28@github.com/mehtaportfolio/portfolio-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mehtaportfolio/portfolio-tracker/issues"
+  },
+  "homepage": ""
+}
