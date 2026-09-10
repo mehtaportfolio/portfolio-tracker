@@ -375,7 +375,7 @@ const handleAddCompany = async () => {
       epf_number: newCompanyData.epf_number,
       company_name: newCompanyData.company_name,
       date_of_joining: newCompanyData.date_of_joining,
-      date_of_left: newCompanyData.date_of_left,
+      date_of_left: newCompanyData.date_of_left || null,
       asset_type: 'EPF'
     }, token);
     alert("✅ Company added successfully!");
