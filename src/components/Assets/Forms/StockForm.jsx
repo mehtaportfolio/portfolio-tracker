@@ -318,7 +318,8 @@ const handleDownloadSample = async () => {
 
     const referenceData = [
       { account_name: "PM", account_type: "regular", equity_type: "stock", broker_name: "zerodha" },
-      { account_name: "PDM", account_type: "free", equity_type: "etf", broker_name: "angel" },
+      { account_name: "PM", account_type: "free", equity_type: "etf", broker_name: "angel" },
+      { account_name: "PSM", account_type: "ipo", equity_type: "stock", broker_name: "zerodha" },
     ];
 // 4. Build workbook
 
@@ -2038,6 +2039,7 @@ const BulkAddModal = ({ onClose, onSuccess, stockOptions, accountOptions, stockM
                       <option value="" className="bg-[#1c1c1c]">Select</option>
                       <option value="regular" className="bg-[#1c1c1c]">regular</option>
                       <option value="free" className="bg-[#1c1c1c]">free</option>
+		      <option value="ipo" className="bg-[#1c1c1c]">ipo</option>
                     </select>
                   </td>
                   <td className="p-3">
@@ -2358,6 +2360,7 @@ const BulkAddModal = ({ onClose, onSuccess, stockOptions, accountOptions, stockM
                   <option value="">Select Type</option>
                   <option value="regular">regular</option>
                   <option value="free">free</option>
+                  <option value="ipo">ipo</option>
                 </select>
               </div>
 

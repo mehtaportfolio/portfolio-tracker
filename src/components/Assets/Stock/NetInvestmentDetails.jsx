@@ -13,7 +13,8 @@ function NetInvestmentDetails({ year, accountFilter, onClose, refreshData }) {
     transaction_type: "deposit",
     amount: "",
     account_name: "",
-    stock_name: ""
+    stock_name: "",
+    notes: ""
   });
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [sortColumn, setSortColumn] = useState("date");
@@ -55,7 +56,8 @@ function NetInvestmentDetails({ year, accountFilter, onClose, refreshData }) {
       transaction_type: transaction.transaction_type || "deposit",
       amount: transaction.amount,
       account_name: transaction.account_name || "",
-      stock_name: transaction.stock_name || ""
+      stock_name: transaction.stock_name || "",
+      notes: transaction.notes || ""
     });
     setIsEditModalOpen(true);
   };
@@ -308,7 +310,7 @@ function NetInvestmentDetails({ year, accountFilter, onClose, refreshData }) {
 
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[120] p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-[500px] transform transition-all">
+          <div className="bg-gray-900 border border-gray-800 rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-[500px] max-h-[90vh] overflow-y-auto transform transition-all">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-black text-white tracking-tight">Edit Transaction</h3>
               <button
@@ -374,6 +376,16 @@ function NetInvestmentDetails({ year, accountFilter, onClose, refreshData }) {
                   value={editForm.stock_name}
                   onChange={(e) => setEditForm({ ...editForm, stock_name: e.target.value })}
                   className="w-full bg-gray-800 border border-gray-700 rounded-2xl p-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Notes</label>
+                <textarea
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                  placeholder="Optional notes..."
+                  className="w-full min-h-[80px] bg-gray-800 border border-gray-700 rounded-2xl p-4 text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                 />
               </div>
             </div>
