@@ -4,6 +4,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import assetAPI from "../../api/assetAPI.js";
 import { useTrialMode } from "../../hooks/useTrialMode.js";
+import { getCurrentEpfCompany, getLatestEpfDeposit, hasEpfRecordForMonth } from "../../utils/epfUtils.js";
 import EpfForm from "./Forms/EPFForm.jsx";
 import { Plus, FileText, FileSpreadsheet, Pencil, Trash, TrendingUp, PieChart, IndianRupee, Activity, BarChart3, Wallet, LayoutGrid, Calendar, Building2, User } from "lucide-react";
 
@@ -95,6 +96,8 @@ const Epf = () => {
   const token = session?.access_token;
   const [records, setRecords] = useState([]);
   const [userMasterData, setUserMasterData] = useState([]);
+  const [recordsLoaded, setRecordsLoaded] = useState(false);
+  const [masterDataLoaded, setMasterDataLoaded] = useState(false);
   const [filters, setFilters] = useState({ fy: [currentFY], company: "", invest: "" });
   const [editingCompany, setEditingCompany] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -127,6 +130,7 @@ const Epf = () => {
     try {
       const data = await assetAPI.getTransactions('epf', token);
       setRecords(data.transactions || []);
+      setRecordsLoaded(true);
     } catch (error) {
       console.error("❌ Error fetching EPF records:", error);
     }
@@ -137,6 +141,7 @@ const Epf = () => {
     try {
       const data = await assetAPI.getUserMaster('EPF', token);
       setUserMasterData(data || []);
+      setMasterDataLoaded(true);
     } catch (err) {
       console.error("❌ Error fetching company data:", err);
     }
@@ -416,7 +421,7 @@ const filteredRecords = records.filter((r) => {
 });
 
 const resetFilters = () => {
-  setFilters({ fy: [currentFY], company: "SMPL-MP", invest: "" });
+  setFilters({ fy: [currentFY], company: "VY-MP", invest: "" });
   setFyQuery(currentFY);
 };
 
@@ -598,49 +603,45 @@ useEffect(() => {
   // Auto-insert logic for new month on 1st date
   const hasCheckedAutoInsert = useRef(false);
   useEffect(() => {
-    if (records.length > 0 && !hasCheckedAutoInsert.current) {
+    if (recordsLoaded && masterDataLoaded && !hasCheckedAutoInsert.current) {
       const checkAndAutoInsert = async () => {
+        hasCheckedAutoInsert.current = true;
         const today = new Date();
-        // Trigger on first visit of the month
+        const currentCompany = getCurrentEpfCompany(userMasterData);
+        if (!currentCompany?.company_name
+          || hasEpfRecordForMonth(records, currentCompany.company_name, today)) {
+          return;
+        }
+
+        const latestDeposit = getLatestEpfDeposit(records, currentCompany.company_name);
+        if (!latestDeposit) return;
+
         const currentMonthFirstDate = new Date(today.getFullYear(), today.getMonth(), 1);
         const yyyy = currentMonthFirstDate.getFullYear();
         const mm = String(currentMonthFirstDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(currentMonthFirstDate.getDate()).padStart(2, '0');
-        const dateStr = `${yyyy}-${mm}-${dd}`;
-        
-        // Check if entry for this month already exists
-        const alreadyExists = records.some(r => r.contribution_date === dateStr);
-        
-        if (!alreadyExists) {
-          // Find the latest deposit from previous months
-          const sortedRecords = [...records].sort((a, b) => new Date(b.contribution_date) - new Date(a.contribution_date));
-          const latestDeposit = sortedRecords.find(r => String(r.invest_type).toLowerCase() === 'deposit');
-          
-          if (latestDeposit) {
-            console.log("🚀 Auto-inserting EPF record for new month:", dateStr);
-            try {
-              await assetAPI.addTransaction('epf', {
-                company_name: latestDeposit.company_name,
-                contribution_date: dateStr,
-                employee_share: parseFloat(latestDeposit.employee_share),
-                employer_share: parseFloat(latestDeposit.employer_share),
-                pension_share: parseFloat(latestDeposit.pension_share),
-                invest_type: latestDeposit.invest_type,
-                created_at: new Date().toISOString()
-              });
-              await assetAPI.invalidateCache('epf');
-              fetchRecords();
-            } catch (error) {
-              console.error("❌ Auto-insertion failed:", error);
-            }
-          }
+        const dateStr = `${yyyy}-${mm}-01`;
+
+        console.log("🚀 Auto-inserting EPF record for current company:", currentCompany.company_name, dateStr);
+        try {
+          await assetAPI.addTransaction('epf', {
+            company_name: currentCompany.company_name,
+            contribution_date: dateStr,
+            employee_share: parseFloat(latestDeposit.employee_share),
+            employer_share: parseFloat(latestDeposit.employer_share),
+            pension_share: parseFloat(latestDeposit.pension_share),
+            invest_type: latestDeposit.invest_type,
+            created_at: new Date().toISOString()
+          }, token);
+          await assetAPI.invalidateCache('epf', token);
+          fetchRecords();
+        } catch (error) {
+          console.error("❌ Auto-insertion failed:", error);
         }
-        hasCheckedAutoInsert.current = true;
       };
       
       checkAndAutoInsert();
     }
-  }, [records, fetchRecords]);
+  }, [records, userMasterData, recordsLoaded, masterDataLoaded, fetchRecords, token]);
 
   // Open edit modal for a transaction
   const handleOpenEditTransaction = (tx) => {

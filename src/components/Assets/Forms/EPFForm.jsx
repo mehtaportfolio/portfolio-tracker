@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from "react";
 import assetAPI from "../../../api/assetAPI.js";
 import { useNavigation } from "../../../context/NavigationContext.jsx";
+import { useAuth } from "../../../context/AuthContext.jsx";
+import { getCurrentEpfCompany, getLatestEpfDeposit } from "../../../utils/epfUtils.js";
 import { X } from "lucide-react";
 
 const EpfForm = ({ onClose, onSuccess }) => {
   const { setIsBottomBarHidden } = useNavigation();
+  const { session } = useAuth();
+  const token = session?.access_token;
   const [form, setForm] = useState({
-    company_name: "SMPL-MP",
+    company_name: "",
     company_name_input: "",
     contribution_date: "",
-    employee_share: "7181",
-    employer_share: "550",
-    pension_share: "1250",
+    employee_share: "",
+    employer_share: "",
+    pension_share: "",
     invest_type: "deposit",
   });
+  const [epfRecords, setEpfRecords] = useState([]);
 
   useEffect(() => {
     setIsBottomBarHidden(true);
@@ -22,22 +27,60 @@ const EpfForm = ({ onClose, onSuccess }) => {
 
   const [companies, setCompanies] = useState([]);
 
-  // Fetch unique company names
+  // Use the active EPF account and its latest deposit for initial form values.
   useEffect(() => {
-    const fetchCompanies = async () => {
+    const fetchEpfDefaults = async () => {
       try {
-        const uniqueCompanies = await assetAPI.getDistinctNames('epf', 'company_name');
-        setCompanies(uniqueCompanies);
+        const [masterData, epfData] = await Promise.all([
+          assetAPI.getUserMaster('EPF', token),
+          assetAPI.getTransactions('epf', token),
+        ]);
+        const records = epfData.transactions || [];
+        const currentCompany = getCurrentEpfCompany(masterData || []);
+        const latestDeposit = getLatestEpfDeposit(records, currentCompany?.company_name);
+        let uniqueCompanies = [];
+
+        try {
+          uniqueCompanies = await assetAPI.getDistinctNames('epf', 'company_name', token);
+        } catch (error) {
+          console.error("❌ Error fetching EPF company names:", error.message);
+        }
+
+        setCompanies([...new Set([
+          ...(uniqueCompanies || []),
+          ...records.map((record) => record.company_name).filter(Boolean),
+          currentCompany?.company_name,
+        ].filter(Boolean))]);
+        setEpfRecords(records);
+        setForm((currentForm) => ({
+          ...currentForm,
+          company_name: currentCompany?.company_name || "",
+          employee_share: latestDeposit?.employee_share?.toString() || "",
+          employer_share: latestDeposit?.employer_share?.toString() || "",
+          pension_share: latestDeposit?.pension_share?.toString() || "",
+        }));
       } catch (error) {
-        console.error("❌ Error fetching companies:", error.message);
+        console.error("❌ Error fetching EPF defaults:", error.message);
       }
     };
 
-    fetchCompanies();
-  }, []);
+    fetchEpfDefaults();
+  }, [token]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "company_name") {
+      const latestDeposit = getLatestEpfDeposit(epfRecords, value);
+      setForm((currentForm) => ({
+        ...currentForm,
+        company_name: value,
+        employee_share: latestDeposit?.employee_share?.toString() || "",
+        employer_share: latestDeposit?.employer_share?.toString() || "",
+        pension_share: latestDeposit?.pension_share?.toString() || "",
+      }));
+      return;
+    }
+    setForm((currentForm) => ({ ...currentForm, [name]: value }));
   };
 
   const handleSubmit = async () => {
